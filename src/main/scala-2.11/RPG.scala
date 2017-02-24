@@ -25,7 +25,6 @@ object RPG extends App {
     if (input == "1") { // 攻撃する
       hero.attack(monster)
       println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
-    
     } else if (input == "2") { // 防御する
       hero.defend(monster)
       println(s"あなたは防御し、${monster.attackDamage / 2}のダメージを受けた。")
