@@ -78,6 +78,10 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
     this.hitPoint = this.hitPoint - monster.attackDamage
   }
 
+  def defend(monster: Monster): Unit = {
+    this.hitPoint = this.hitPoint - (monster.attackDamage / 2)
+  }
+
   def escape(monster: Monster): Boolean = {
     val isEscape = RPG.random.nextInt(2) == 1
     if (!isEscape) {
