@@ -3,7 +3,7 @@ import java.util.Random
 object RPG extends App {
   val random = new Random
   val monsterCount = 5
-  val hero = new Hero(200, 30)
+  val hero = new Hero(240, 50, 20)
   var monsters = for (i <- 1 to monsterCount) yield new Monster(random.nextInt(120), random.nextInt(120), false)
 
   println(
@@ -15,15 +15,20 @@ object RPG extends App {
         |一度でもダメージを受けるとモンスターの体力と攻撃力が判明する。
         |またモンスターを倒した場合、武器を奪いその攻撃力を得ることできる。
         |---------------------------------------------
-        |未知のモンスターがあらわれた。""".stripMargin)
+        |未知のモンスターがあらわれた。
+        |【現在の状態】: ${hero}""".stripMargin)
 
   while (!monsters.isEmpty) {
     val monster = monsters.head
-    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 逃走[0] > ")
+    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 防御[2] or 逃走[0] > ")
 
-    if (input == "1") { // 攻撃する
+    if (input == "1") {
+      // 攻撃する
       hero.attack(monster)
       println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+    } else if (input == "2") {
+      // 防御する
+      println(s"あなたは${hero.defense(monster)}のダメージを受けた。")
     } else { // 逃走する
       if(hero.escape(monster)) {
         println("あなたは、モンスターから逃走に成功した。")
@@ -66,11 +71,20 @@ abstract class Creature(var hitPoint: Int, var attackDamage: Int) {
   def isAlive(): Boolean = this.hitPoint > 0
 }
 
-class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _attackDamage) {
+class Hero(_hitPoint: Int, _attackDamage: Int, defenseDamage: Int) extends Creature(_hitPoint, _attackDamage) {
 
   def attack(monster: Monster): Unit = {
     monster.hitPoint = monster.hitPoint - this.attackDamage
     this.hitPoint = this.hitPoint - monster.attackDamage
+  }
+
+  def defense(monster: Monster): Int = {
+    var defensedDamage = 0
+    if (this.defenseDamage < monster.attackDamage) {
+      defensedDamage = monster.attackDamage - this.defenseDamage
+      this.hitPoint = this.hitPoint - monster.attackDamage + this.defenseDamage
+    }
+    defensedDamage
   }
 
   def escape(monster: Monster): Boolean = {
@@ -83,7 +97,7 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
     isEscape
   }
 
-  override def toString = s"Hero(体力:${hitPoint}, 攻撃力:${attackDamage})"
+  override def toString = s"Hero(体力:${hitPoint}, 攻撃力:${attackDamage}, 防御力:${defenseDamage})"
 
 }
 
