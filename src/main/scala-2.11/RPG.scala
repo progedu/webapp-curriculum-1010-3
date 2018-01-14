@@ -83,6 +83,10 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
     isEscape
   }
 
+  def heal(): Unit = {
+    this.hitPoint = this.hitPoint + RPG.random.nextInt(100)
+  }
+
   override def toString = s"Hero(体力:${hitPoint}, 攻撃力:${attackDamage})"
 
 }
