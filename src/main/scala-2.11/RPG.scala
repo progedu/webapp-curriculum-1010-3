@@ -17,20 +17,29 @@ object RPG extends App {
         |---------------------------------------------
         |未知のモンスターがあらわれた。""".stripMargin)
 
+
   while (!monsters.isEmpty) {
     val monster = monsters.head
-    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 逃走[0] > ")
+    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] 回復[2] 逃走[0] > ")
 
-    if (input == "1") { // 攻撃する
-      hero.attack(monster)
-      println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
-    } else { // 逃走する
-      if(hero.escape(monster)) {
-        println("あなたは、モンスターから逃走に成功した。")
-      } else {
-        println(s"あなたは、モンスターから逃走に失敗し、${monster.attackDamage}のダメージを受けた。")
+    input match { // 攻撃する
+      case "1" => {
+        hero.attack(monster)
+        println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+      }
+      case "2" => { // 回復する
+        hero.healing()
+        println(s"あなたは治療を行い、体力を回復した。${monster.attackDamage}のダメージを受けた。")
+      }
+      case _ => {
+        if(hero.escape(monster)) {
+          println("あなたは、モンスターから逃走に成功した。")
+        } else {
+          println(s"あなたは、モンスターから逃走に失敗し、${monster.attackDamage}のダメージを受けた。")
+        }
       }
     }
+
     println(s"【現在の状態】: ${hero}, ${monster}")
 
     if (!hero.isAlive) { // Hero が死んでいるかどうか
@@ -68,9 +77,20 @@ abstract class Creature(var hitPoint: Int, var attackDamage: Int) {
 
 class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _attackDamage) {
 
+  val limitHitPoint = _hitPoint
+
   def attack(monster: Monster): Unit = {
     monster.hitPoint = monster.hitPoint - this.attackDamage
     this.hitPoint = this.hitPoint - monster.attackDamage
+  }
+
+  def healing(): Unit ={
+    var heal = RPG.random.nextInt(60) + 20
+    if (_hitPoint + heal <= limitHitPoint) {
+      this.hitPoint = this.hitPoint + heal
+    } else {
+      this.hitPoint = limitHitPoint
+    }
   }
 
   def escape(monster: Monster): Boolean = {
