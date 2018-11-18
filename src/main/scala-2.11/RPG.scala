@@ -83,6 +83,12 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
     isEscape
   }
 
+  def sutemi(monster: Monster): Unit = {
+    monster.hitPoint = monster.hitPoint - this.attackDamage*2
+    this.hitPoint = this.hitPoint - monster.attackDamage*2
+  }
+
+
   override def toString = s"Hero(体力:${hitPoint}, 攻撃力:${attackDamage})"
 
 }
