@@ -19,14 +19,18 @@ object RPG extends App {
 
   while (!monsters.isEmpty) {
     val monster = monsters.head
-    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 逃走[0] > ")
+    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 逃走[0] or すてみ[2] > ")
 
     if (input == "1") { // 攻撃する
       hero.attack(monster)
       println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+    }else if (input == "2") { // すてみで攻撃する
+      hero.sutemi(monster)
+      println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
     } else { // 逃走する
       if(hero.escape(monster)) {
-        println("あなたは、モンスターから逃走に成功した。")
+        println("あなたは、モンスタ1" +
+          "ーから逃走に成功した。")
       } else {
         println(s"あなたは、モンスターから逃走に失敗し、${monster.attackDamage}のダメージを受けた。")
       }
