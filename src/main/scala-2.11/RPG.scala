@@ -3,8 +3,9 @@ import java.util.Random
 object RPG extends App {
   val random = new Random
   val monsterCount = 5
-  val hero = new Hero(200, 30)
-  var monsters = for (i <- 1 to monsterCount) yield new Monster(random.nextInt(120), random.nextInt(120), false)
+  val hero = new Hero(200, 30, 10)
+  var monsters = for (i <- 1 to monsterCount)
+    yield new Monster(random.nextInt(120), random.nextInt(120), random.nextInt(15), false)
 
   println(
     s"""あなたは冒険中の ${hero} であり、
@@ -22,8 +23,17 @@ object RPG extends App {
     val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 逃走[0] > ")
 
     if (input == "1") { // 攻撃する
-      hero.attack(monster)
-      println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+      if (hero.speed > monster.speed) {
+        println("あなたの先制攻撃！")
+      } else {
+        println("モンスターの先制攻撃！")
+      }
+      if (hero.attack(monster)) {
+        println(s"***** 会心の一撃！！ *****")
+        println(s"あなたは${hero.attackDamage * 2}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+      } else {
+        println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+      }
     } else { // 逃走する
       if(hero.escape(monster)) {
         println("あなたは、モンスターから逃走に成功した。")
@@ -62,15 +72,27 @@ object RPG extends App {
 
 }
 
-abstract class Creature(var hitPoint: Int, var attackDamage: Int) {
+abstract class Creature(var hitPoint: Int, var attackDamage: Int, var speed: Int) {
   def isAlive(): Boolean = this.hitPoint > 0
 }
 
-class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _attackDamage) {
+class Hero(_hitPoint: Int, _attackDamage: Int, _speed: Int) extends Creature(_hitPoint, _attackDamage, _speed) {
 
-  def attack(monster: Monster): Unit = {
-    monster.hitPoint = monster.hitPoint - this.attackDamage
-    this.hitPoint = this.hitPoint - monster.attackDamage
+  def attack(monster: Monster): Boolean = {
+    val isCritical = RPG.random.nextInt(4) == 1 // 1/4で会心の一撃
+
+    if (this.speed > monster.speed) {
+      monster.hitPoint = monster.hitPoint - (this.attackDamage * (if (isCritical) 2 else 1))
+      if (monster.hitPoint > 0) {
+        this.hitPoint = this.hitPoint - monster.attackDamage
+      }
+    } else {
+      this.hitPoint = this.hitPoint - monster.attackDamage
+      if (this.hitPoint > 0) {
+        monster.hitPoint = monster.hitPoint - (this.attackDamage * (if (isCritical) 2 else 1))
+      }
+    }
+    isCritical
   }
 
   def escape(monster: Monster): Boolean = {
@@ -83,13 +105,13 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
     isEscape
   }
 
-  override def toString = s"Hero(体力:${hitPoint}, 攻撃力:${attackDamage})"
+  override def toString = s"Hero(体力:${hitPoint}, 攻撃力:${attackDamage}、素早さ:${speed})"
 
 }
 
-class Monster(_hitPoint: Int, _attackDamage: Int, var isAwayFromHero: Boolean)
-  extends  Creature(_hitPoint, _attackDamage) {
+class Monster(_hitPoint: Int, _attackDamage: Int, var _speed: Int, var isAwayFromHero: Boolean)
+  extends  Creature(_hitPoint, _attackDamage, _speed) {
 
-  override def toString = s"Monster(体力: ${hitPoint}, 攻撃力:${attackDamage}, ヒーローから離れている:${isAwayFromHero})"
+  override def toString = s"Monster(体力: ${hitPoint}, 攻撃力:${attackDamage}、素早さ:${speed}, ヒーローから離れている:${isAwayFromHero})"
 
 }
