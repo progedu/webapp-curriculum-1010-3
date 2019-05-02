@@ -23,12 +23,12 @@ object RPG extends App {
 
     if (input == "1") { // 攻撃する
       hero.attack(monster)
-      println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+      println(s"あなたは${hero.battleDamage}のダメージを与え、${monster.battleDamage}のダメージを受けた。")
     } else { // 逃走する
       if(hero.escape(monster)) {
         println("あなたは、モンスターから逃走に成功した。")
       } else {
-        println(s"あなたは、モンスターから逃走に失敗し、${monster.attackDamage}のダメージを受けた。")
+        println(s"あなたは、モンスターから逃走に失敗し、${monster.battleDamage}のダメージを受けた。")
       }
     }
     println(s"【現在の状態】: ${hero}, ${monster}")
@@ -42,6 +42,10 @@ object RPG extends App {
       if(!monster.isAwayFromHero) { // 倒した場合
         println("モンスターは倒れた。そしてあなたは、モンスターの武器を奪った。")
         if (monster.attackDamage > hero.attackDamage) hero.attackDamage = monster.attackDamage
+
+        val heal = (monster.maxHitPoint * 0.1).toInt
+        hero.hitPoint = if (hero.hitPoint + heal > hero.maxHitPoint) hero.maxHitPoint else hero.hitPoint + heal
+        println(s"モンスターの肉を貪り、体力が${heal}回復した。")
       }
       monsters = monsters.tail
       println(s"残りのモンスターは${monsters.length}匹となった。")
@@ -64,32 +68,46 @@ object RPG extends App {
 
 abstract class Creature(var hitPoint: Int, var attackDamage: Int) {
   def isAlive(): Boolean = this.hitPoint > 0
+
+  def battleDamage(): Int = attackDamage
+
+  val maxHitPoint = hitPoint
+  
 }
 
 class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _attackDamage) {
 
   def attack(monster: Monster): Unit = {
-    monster.hitPoint = monster.hitPoint - this.attackDamage
-    this.hitPoint = this.hitPoint - monster.attackDamage
+    monster.hitPoint = monster.hitPoint - this.battleDamage
+    this.hitPoint = this.hitPoint - monster.battleDamage
+    
   }
 
   def escape(monster: Monster): Boolean = {
     val isEscape = RPG.random.nextInt(2) == 1
     if (!isEscape) {
-      this.hitPoint = this.hitPoint - monster.attackDamage
+      this.hitPoint = this.hitPoint - monster.battleDamage
     } else {
       monster.isAwayFromHero = true
     }
     isEscape
   }
 
-  override def toString = s"Hero(体力:${hitPoint}, 攻撃力:${attackDamage})"
+  override def toString = s"Hero(体力:${hitPoint}/${maxHitPoint}, 攻撃力:${battleDamage}/${attackDamage})"
 
 }
 
 class Monster(_hitPoint: Int, _attackDamage: Int, var isAwayFromHero: Boolean)
   extends  Creature(_hitPoint, _attackDamage) {
+  
+  // 体力の減少に伴い攻撃力も減少する
+  override def battleDamage(): Int = {
+    ((hitPoint / _hitPoint.toFloat) * attackDamage).toInt match {
+      case damage if damage < 0 => 0
+      case damage => damage
+    }
+  }
 
-  override def toString = s"Monster(体力: ${hitPoint}, 攻撃力:${attackDamage}, ヒーローから離れている:${isAwayFromHero})"
+  override def toString = s"Monster(体力: ${hitPoint}/${maxHitPoint}, 攻撃力:${battleDamage}/${attackDamage}, ヒーローから離れている:${isAwayFromHero})"
 
 }
