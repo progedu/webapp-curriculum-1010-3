@@ -19,11 +19,15 @@ object RPG extends App {
 
   while (!monsters.isEmpty) {
     val monster = monsters.head
-    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 逃走[0] > ")
+    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 防御[2] or 逃走[0] > ")
 
     if (input == "1") { // 攻撃する
       hero.attack(monster)
       println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+    } else if (input == "2") { //防御する
+      println(s"あなたは防御している。${monster.attackDamage / 2}のダメージを受けた。")
+      println(s"モンスターの体力が10減った。")
+      hero.defense(monster)
     } else { // 逃走する
       if(hero.escape(monster)) {
         println("あなたは、モンスターから逃走に成功した。")
@@ -70,7 +74,13 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
 
   def attack(monster: Monster): Unit = {
     monster.hitPoint = monster.hitPoint - this.attackDamage
+    if (monster.hitPoint < 0) monster.hitPoint = 0
     this.hitPoint = this.hitPoint - monster.attackDamage
+  }
+
+  def defense(monster: Monster): Unit = {
+    monster.hitPoint = monster.hitPoint - 10
+    this.hitPoint = this.hitPoint - (monster.attackDamage / 2)
   }
 
   def escape(monster: Monster): Boolean = {
