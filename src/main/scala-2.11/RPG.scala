@@ -83,7 +83,7 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
     if (!isEscape) {
       this.hitPoint = this.hitPoint - monster.attackDamage
     } else {
-      monster.isAwayFromHero = truegit
+      monster.isAwayFromHero = true
     }
     isEscape
   }
