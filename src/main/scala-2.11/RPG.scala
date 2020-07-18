@@ -24,8 +24,11 @@ object RPG extends App {
     if (input == "1") { // 攻撃する
       hero.attack(monster)
       println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
-    } else { // 逃走する
-      if(hero.escape(monster)) {
+    } else if (input == "2") {
+      hero.guard(monster)
+      println("あなたは、攻撃を防いだ。")
+    } else if (input == "0"){ // 逃走する
+      if (hero.escape(monster)) {
         println("あなたは、モンスターから逃走に成功した。")
       } else {
         println(s"あなたは、モンスターから逃走に失敗し、${monster.attackDamage}のダメージを受けた。")
@@ -71,6 +74,10 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
   def attack(monster: Monster): Unit = {
     monster.hitPoint = monster.hitPoint - this.attackDamage
     this.hitPoint = this.hitPoint - monster.attackDamage
+  }
+
+  def guard(monster: Monster): Unit = {
+    monster.hitPoint = 0
   }
 
   def escape(monster: Monster): Boolean = {
