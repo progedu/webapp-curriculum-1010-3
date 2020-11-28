@@ -3,7 +3,7 @@ import java.util.Random
 object RPG extends App {
   val random = new Random
   val monsterCount = 5
-  val hero = new Hero(200, 30)
+  val hero = new Hero(300, 30)
   var monsters = for (i <- 1 to monsterCount) yield new Monster(random.nextInt(120), random.nextInt(120), false)
 
   println(
@@ -19,11 +19,14 @@ object RPG extends App {
 
   while (!monsters.isEmpty) {
     val monster = monsters.head
-    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 逃走[0] > ")
+    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 防御[2] or 逃走[0] > ")
 
     if (input == "1") { // 攻撃する
       hero.attack(monster)
       println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+    } else if (input == "2") {
+      hero.defence(monster)
+      println(s"あなたは防御した。${monster.attackDamage / 2} のダメージを受けた")
     } else { // 逃走する
       if(hero.escape(monster)) {
         println("あなたは、モンスターから逃走に成功した。")
@@ -81,6 +84,11 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
       monster.isAwayFromHero = true
     }
     isEscape
+  }
+
+  def defence(monster: Monster): Unit = {
+    // 防御時は 1/2のダメージを受けるとする
+    this.hitPoint = this.hitPoint - (monster.attackDamage / 2)
   }
 
   override def toString = s"Hero(体力:${hitPoint}, 攻撃力:${attackDamage})"
