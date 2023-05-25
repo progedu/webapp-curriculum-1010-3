@@ -1,7 +1,7 @@
 import java.util.Random
 
 object RPG extends App {
-  val random = new Random
+  val random = new Random()
   val monsterCount = 5
   val hero = new Hero(200, 30)
   var monsters = for (i <- 1 to monsterCount) yield new Monster(random.nextInt(120), random.nextInt(120), false)
@@ -19,11 +19,14 @@ object RPG extends App {
 
   while (!monsters.isEmpty) {
     val monster = monsters.head
-    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 逃走[0] > ")
+    val input = scala.io.StdIn.readLine("【選択】: 攻撃[1] or 防御[2] or 逃走[0] > ")
 
     if (input == "1") { // 攻撃する
       hero.attack(monster)
       println(s"あなたは${hero.attackDamage}のダメージを与え、${monster.attackDamage}のダメージを受けた。")
+    } else if (input == "2") {
+      println("あなたは防御した。防御時にモンスターは衝撃を受けた")
+      hero.deffence(monster)
     } else { // 逃走する
       if(hero.escape(monster)) {
         println("あなたは、モンスターから逃走に成功した。")
@@ -73,6 +76,16 @@ class Hero(_hitPoint: Int, _attackDamage: Int) extends Creature(_hitPoint, _atta
     this.hitPoint = this.hitPoint - monster.attackDamage
   }
 
+  def deffence(monster: Monster): Unit = {
+    var monsterDamage =  RPG.random.nextInt(15)
+    var heroDamage = if (monster.attackDamage <= 30) 0 else (monster.attackDamage / 7 + RPG.random.nextInt(15)).toInt
+    monster.hitPoint = monster.hitPoint - monsterDamage
+    this.hitPoint = this.hitPoint - heroDamage
+    this.deffenceMsg(heroDamage,monsterDamage)
+  }
+  def deffenceMsg(heroDamage: Int, monsterDamage: Int): Unit = {
+    println(s"あなたは${monsterDamage}のダメージを与え、${heroDamage}のダメージを受けた。")
+  }
   def escape(monster: Monster): Boolean = {
     val isEscape = RPG.random.nextInt(2) == 1
     if (!isEscape) {
